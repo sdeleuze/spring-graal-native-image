@@ -1125,12 +1125,7 @@ public class TypeSystem {
 			File f = new File(classpathEntry);
 			if (f.isDirectory()) {
 				result.add(Paths.get(f.toURI()));
-			} else if (f.isFile() &&
-					   f.getName().endsWith(".jar") && 
-					   (f.getParent().endsWith(File.separator+"target") ||
-					    // This pattern recognizes libs/foo.jar which occurs with gradle multi module setups
-					    f.getParent().endsWith(File.separator+"libs"))
-					   ) {
+			} else if (f.isFile() && f.getName().endsWith(".jar") && !f.getAbsolutePath().contains("org" + File.separator + "springframework")) {
 				result.add(Paths.get(f.toURI()));
 			}
 		}
@@ -1237,8 +1232,14 @@ public class TypeSystem {
 	}
 
 	public List<Entry<Type, List<Type>>> scanForSpringComponents() {
-		return findDirectoriesOrTargetDirJar(getClasspath()).flatMap(this::findClasses).map(this::typenameOfClass)
-				.map(this::getStereoTypesOnType).filter(Objects::nonNull).collect(Collectors.toList());
+		return findDirectoriesOrTargetDirJar(getClasspath()).flatMap(this::findClasses).map(p -> {
+			try {
+				return getStereoTypesOnType(typenameOfClass(p));
+			} catch (IllegalStateException|MissingTypeException ex) {
+				logger.debug("Error during scanning Spring components : " + ex.getMessage());
+			}
+			return null;
+			}).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	// TODO memory management when exploding typecache with scans done here
