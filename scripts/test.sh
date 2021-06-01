@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # If supplied $1 is the executable and $2 is the file where to create test-output.txt and summary.csv, otherwise these
 # default to the 'target/current-directory-name' (e.g. target/commandlinerunner) and 
-# target/native-image respectively
+# target/native respectively
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'

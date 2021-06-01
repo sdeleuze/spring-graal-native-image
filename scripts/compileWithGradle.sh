@@ -11,9 +11,9 @@ rm -rf build
 mkdir -p build/native-image
 
 echo "Packaging ${PWD##*/} with Gradle"
-./gradlew assemble &> build/native-image/output.txt
+./gradlew nativeTest nativeBuild &> build/native-image/output.txt
 
-if [[ -f build/libs/${PWD##*/}-0.0.1-SNAPSHOT.jar ]]
+if [[ -f build/native-image/${PWD##*/} ]]
 then
   printf "${GREEN}SUCCESS${NC}\n"
 else
