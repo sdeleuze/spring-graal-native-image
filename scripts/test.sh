@@ -26,9 +26,9 @@ else
 fi
 
 if [ -z "$1" ] || [[ "$1" == "--"* ]]; then
-  TEST_OUTPUT_FILE=target/native-image/test-output.txt
-  BUILD_OUTPUT_FILE=target/native-image/output.txt
-  SUMMARY_CSV_FILE=target/native-image/summary.csv
+  TEST_OUTPUT_FILE=target/native/test-output.txt
+  BUILD_OUTPUT_FILE=target/native/output.txt
+  SUMMARY_CSV_FILE=target/native/summary.csv
 else
   TEST_OUTPUT_FILE=$1/test-output.txt
   BUILD_OUTPUT_FILE=$1/output.txt

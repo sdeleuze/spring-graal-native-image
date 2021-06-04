@@ -27,8 +27,6 @@
 		<!-- TODO Bring back "paketobuildpacks/builder:tiny" before 0.10.0 release -->
 		<builder>dmikusa/graalvm-tiny</builder>
 
-		<native.buildtools.version>0.1.0-SNAPSHOT</native.buildtools.version>
-
 		<spring-cloud.version>2020.0.3</spring-cloud.version>
 	</properties>
 
@@ -168,14 +166,17 @@
 	</dependencyManagement>
 
 	<profiles>
-		<!-- Enable building a native image using a local installation of native-image with GraalVM native-image-maven-plugin -->
+		<!-- Enable building a native image using a local installation of native-image with GraalVM native-maven-plugin -->
 		<profile>
 			<id>native</id>
 			<properties>
-				<!-- Avoid a clash between Spring Boot repackaging and native-image-maven-plugin -->
+				<!-- Avoid a clash between Spring Boot repackaging and native-maven-plugin -->
 				<classifier>exec</classifier>
+
+				<native.buildtools.version>1.0.0-SNAPSHOT</native.buildtools.version>
 			</properties>
 			<dependencies>
+				<!-- Won't be need as of JUnit 5.8, see https://github.com/junit-team/junit5/issues/2619 -->
 				<dependency>
 					<groupId>org.graalvm.buildtools</groupId>
 					<artifactId>junit-platform-native</artifactId>
