@@ -84,6 +84,11 @@
 			<artifactId>asm-tree</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-util</artifactId>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -126,6 +131,7 @@
 							</relocations>
 							<artifactSet>
 								<includes>
+									<include>org.ow2.asm:asm-util</include>
 									<include>org.ow2.asm:asm-tree</include>
 									<include>org.ow2.asm:asm</include>
 								</includes>
