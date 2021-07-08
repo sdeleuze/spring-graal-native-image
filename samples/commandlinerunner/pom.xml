@@ -48,6 +48,7 @@
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-aot-maven-plugin</artifactId>
 				<configuration>
+					<mode>native-next</mode>
 					<removeYamlSupport>true</removeYamlSupport>
 					<removeSpelSupport>true</removeSpelSupport>
 				</configuration>

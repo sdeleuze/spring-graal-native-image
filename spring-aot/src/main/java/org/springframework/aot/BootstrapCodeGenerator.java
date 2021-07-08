@@ -32,6 +32,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aot.context.bootstrap.ContextBootstrapContributor;
+import org.springframework.aot.context.bootstrap.MainBootstrapContributor;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.springframework.nativex.AotOptions;
 import org.springframework.nativex.domain.proxies.ProxiesDescriptor;
@@ -66,7 +69,7 @@ public class BootstrapCodeGenerator {
 	public void generate(Path sourcesPath, Path resourcesPath, List<String> classpath, Set<Path> resourceFolders) throws IOException {
 		logger.debug("Starting code generation with classpath: " + classpath);
 		File classesFolder = Paths.get(classpath.get(0)).toFile();
-		String singleMainClass = MainClassFinder.findSingleMainClass(classesFolder);
+		String singleMainClass = MainClassFinder.findSingleMainClass(classesFolder, SpringBootApplication.class.getName());
 		DefaultBuildContext buildContext = new DefaultBuildContext(singleMainClass, classpath);
 		generate(sourcesPath, resourcesPath, buildContext, resourceFolders);
 	}
@@ -74,7 +77,7 @@ public class BootstrapCodeGenerator {
 	public void generate(Path sourcesPath, Path resourcesPath, URLClassLoader classLoader, Set<Path> resourceFolders) throws IOException {
 		logger.debug("Starting code generation with classLoader: " + classLoader);
 		File classesFolder = Paths.get(classLoader.getURLs()[0].getFile()).toFile();
-		String singleMainClass = MainClassFinder.findSingleMainClass(classesFolder);
+		String singleMainClass = MainClassFinder.findSingleMainClass(classesFolder, SpringBootApplication.class.getName());
 		DefaultBuildContext buildContext = new DefaultBuildContext(singleMainClass, classLoader);
 		generate(sourcesPath, resourcesPath, buildContext, resourceFolders);
 	}
@@ -93,6 +96,9 @@ public class BootstrapCodeGenerator {
 			ContextBootstrapContributor bootstrapContributor = new ContextBootstrapContributor();
 			logger.debug("Executing Contributor: " + bootstrapContributor.getClass().getName());
 			bootstrapContributor.contribute(buildContext, this.aotOptions);
+			MainBootstrapContributor mainBootstrapGenerator = new MainBootstrapContributor();
+			logger.debug("Executing Contributor: " + mainBootstrapGenerator.getClass().getName());
+			mainBootstrapGenerator.contribute(buildContext, this.aotOptions);
 		}
 		else {
 			ServiceLoader<BootstrapContributor> contributors = ServiceLoader.load(BootstrapContributor.class);
