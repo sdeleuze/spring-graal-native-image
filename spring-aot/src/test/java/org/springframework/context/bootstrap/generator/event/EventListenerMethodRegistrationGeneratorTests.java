@@ -50,6 +50,14 @@ class EventListenerMethodRegistrationGeneratorTests {
 	}
 
 	@Test
+	void writeEventListenersRegistrationWithScopedBean() {
+		DefaultListableBeanFactory beanFactory = prepareBeanFactory();
+		beanFactory.registerBeanDefinition("scopedTarget.single", BeanDefinitionBuilder.rootBeanDefinition(SingleEventListener.class)
+				.getBeanDefinition());
+		assertThat(generateCode(beanFactory)).isEmpty();
+	}
+
+	@Test
 	void writeEventListenersRegistrationWithEventListeners() {
 		DefaultListableBeanFactory beanFactory = prepareBeanFactory();
 		beanFactory.registerBeanDefinition("test", BeanDefinitionBuilder.rootBeanDefinition(SingleEventListener.class)
