@@ -1,38 +1,26 @@
 package org.springframework.aot;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.ApplicationContextFactory;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener;
 import org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.NativeDetector;
-import org.springframework.core.io.ResourceLoader;
 
 /**
- * An extension of {@link SpringApplication} designed to take advantage of AOT pre-processing.
+ * Additional methods and fields required for {@link SpringApplication} substitution.
  *
  * @author Sebastien Deleuze
  */
-public class SpringAotApplication extends SpringApplication {
+public class SpringAotApplication {
 
-	private static final Log logger = LogFactory.getLog(SpringAotApplication.class);
-
-	private static final boolean springAot = "true".equals(System.getProperty("springAot"))
+	public static final boolean SPRING_AOT = "true".equals(System.getProperty("springAot"))
 			|| NativeDetector.inNativeImage();
 
-	ApplicationContextFactory AOT_FACTORY = (webApplicationType) -> {
+	public static ApplicationContextFactory AOT_FACTORY = (webApplicationType) -> {
 		try {
 			switch (webApplicationType) {
 				case SERVLET:
@@ -49,41 +37,13 @@ public class SpringAotApplication extends SpringApplication {
 		}
 	};
 
-	// TODO support multiple sources (not done yet because casting errors with varargs)
-	public SpringAotApplication(Class<?> primarySource) {
-		super((ResourceLoader) null, springAot ? Object.class : primarySource);
-		if (springAot) {
-			logger.info("AOT mode enabled");
-			setApplicationContextFactory(AOT_FACTORY);
-			setInitializers(Arrays.asList(getBootstrapInitializer(), new ConditionEvaluationReportLoggingListener()));
-		}
-		else {
-			logger.info("AOT mode disabled");
-		}
-	}
-
-	private ApplicationContextInitializer<?> getBootstrapInitializer() {
+	public static ApplicationContextInitializer<?> getBootstrapInitializer() {
 		try {
 			return (ApplicationContextInitializer<?>) Class.forName("org.springframework.aot.ContextBootstrapInitializer").getDeclaredConstructor().newInstance();
 		}
 		catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	@Override
-	protected void load(ApplicationContext context, Object[] sources) {
-		if (!springAot) {
-			super.load(context, sources);
-		}
-	}
-
-	public static ConfigurableApplicationContext run(Class<?> primarySource, String[] args) {
-		return new SpringAotApplication(primarySource).run(args);
-	}
-
-	public static void main(String[] args) throws Exception {
-		SpringAotApplication.run(new Class<?>[0], args);
 	}
 
 }
