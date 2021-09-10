@@ -170,7 +170,7 @@ public class ResourcesHandler extends Handler {
 						accessFlags = filterFlags(accessFlags, Flag.allDeclaredMethods, Flag.allPublicMethods);
 					}
 					List<FieldDescriptor> fds = ad.getFieldDescriptors();
-					reflectionHandler.addAccess(typename, MethodDescriptor.toStringArray(mds),
+					reflectionHandler.addAccess(typename, ch.getTriggerTypename(), MethodDescriptor.toStringArray(mds),
 							FieldDescriptor.toStringArray(fds), true, accessFlags);
 				}
 				for (Map.Entry<String, AccessDescriptor> dependantType : ch.getJNITypes().entrySet()) {
@@ -734,7 +734,7 @@ public class ResourcesHandler extends Handler {
 				// 'name' will include the right '$' characters.
 				String name = t.getDottedName();
 				if (t.hasOnlySimpleConstructor()) {
-					reflectionHandler.addAccess(name, new String[][] { { "<init>" } },null, false);
+					reflectionHandler.addAccess(name, null, new String[][] { { "<init>" } },null, false);
 				} else {
 					reflectionHandler.addAccess(name, Flag.allDeclaredConstructors);
 				}
@@ -1588,6 +1588,7 @@ public class ResourcesHandler extends Handler {
 						}
 					}
 				} else {
+					accessRequestor.requestTypeReachable(specificTypeName, hint.getTriggerTypename());
 					Type type = ts.resolveDotted(specificTypeName,true);
 					if (hint.isFollow() || (type!=null && type.shouldFollow())) {					
 						logger.debug( "will follow specific type reference " + specificTypeName);
@@ -1945,7 +1946,9 @@ public class ResourcesHandler extends Handler {
 //			logger.debug(spaces(depth) + "fixed flags? "+Flag.toString(flags));
 //			logger.debug(depth, "ms: "+methods);
 
-			reflectionHandler.addAccess(dname, MethodDescriptor.toStringArray(methods), FieldDescriptor.toStringArray(accessRequestor.getFieldAccessRequestedFor(dname)), true, flags);
+			String typeReachable = accessRequestor.getTypeReachableFor(dname);
+
+			reflectionHandler.addAccess(dname, typeReachable, MethodDescriptor.toStringArray(methods), FieldDescriptor.toStringArray(accessRequestor.getFieldAccessRequestedFor(dname)), true, flags);
 			/*
 			if (flags != null && flags.length == 1 && flags[0] == Flag.allDeclaredConstructors) {
 				Type resolvedType = ts.resolveDotted(dname, true);

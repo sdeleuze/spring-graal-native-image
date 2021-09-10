@@ -30,6 +30,7 @@ import java.util.StringJoiner;
 import java.util.function.Consumer;
 
 import org.springframework.nativex.domain.reflect.ClassDescriptor;
+import org.springframework.nativex.domain.reflect.ConditionDescriptor;
 import org.springframework.nativex.domain.reflect.FieldDescriptor;
 import org.springframework.nativex.domain.reflect.MethodDescriptor;
 import org.springframework.nativex.hint.Flag;
@@ -47,6 +48,8 @@ public class NativeReflectionEntry {
 
 	private final Class<?> type;
 
+	private Class<?> conditionalOnTypeReachable;
+
 	private final Set<Constructor<?>> constructors;
 
 	private final Set<Method> methods;
@@ -57,6 +60,7 @@ public class NativeReflectionEntry {
 
 	private NativeReflectionEntry(Builder builder) {
 		this.type = builder.type;
+		this.conditionalOnTypeReachable = builder.conditionalOnTypeReachable;
 		this.constructors = Collections.unmodifiableSet(builder.constructors);
 		this.methods = Collections.unmodifiableSet(builder.methods);
 		this.fields = Collections.unmodifiableSet(builder.fields);
@@ -118,6 +122,9 @@ public class NativeReflectionEntry {
 	 */
 	public ClassDescriptor toClassDescriptor() {
 		ClassDescriptor descriptor = ClassDescriptor.of(this.type.getName());
+		if (conditionalOnTypeReachable != null) {
+			descriptor.setCondition(new ConditionDescriptor(conditionalOnTypeReachable.getName()));
+		}
 		registerIfNecessary(this.constructors, Flag.allDeclaredConstructors, Flag.allPublicConstructors,
 				(constructor) -> descriptor.addMethodDescriptor(toMethodDescriptor(constructor)));
 		registerIfNecessary(this.methods, Flag.allDeclaredMethods, Flag.allPublicMethods,
@@ -162,6 +169,8 @@ public class NativeReflectionEntry {
 
 		private final Class<?> type;
 
+		private Class<?> conditionalOnTypeReachable;
+
 		private final Set<Constructor<?>> constructors = new LinkedHashSet<>();
 
 		private final Set<Method> methods = new LinkedHashSet<>();
@@ -172,6 +181,16 @@ public class NativeReflectionEntry {
 
 		Builder(Class<?> type) {
 			this.type = type;
+		}
+
+		/**
+		 * Makes this entry conditional to provided type.
+		 * @param conditionalOnTypeReachable The type which should make this entry taken in account.
+		 * @return this for method chaining
+		 */
+		public Builder conditionalOnTypeReachable(Class<?> conditionalOnTypeReachable) {
+			this.conditionalOnTypeReachable = conditionalOnTypeReachable;
+			return this;
 		}
 
 		/**
