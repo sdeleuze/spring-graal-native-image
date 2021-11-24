@@ -53,7 +53,7 @@ public class HateoasHintsTests {
 	@Test
 	public void computesModelAndModelProcessorCorrectly() {
 
-		List<HintDeclaration> hintDeclarations = hateoasHints.computeRepresentationModels(typeSystem);
+		List<HintDeclaration> hintDeclarations = hateoasHints.computeRepresentationModels();
 
 		assertHints(hintDeclarations)
 				.hasSize(4)
@@ -67,7 +67,7 @@ public class HateoasHintsTests {
 	@Test
 	public void jackson() {
 
-		List<HintDeclaration> hintDeclarations = hateoasHints.computeJacksonMappings(typeSystem, Collections.emptySet());
+		List<HintDeclaration> hintDeclarations = hateoasHints.computeJacksonMappings(Collections.emptySet());
 		assertHints(hintDeclarations)
 				// Assert only the ones using jackson
 				.hasSize(7)

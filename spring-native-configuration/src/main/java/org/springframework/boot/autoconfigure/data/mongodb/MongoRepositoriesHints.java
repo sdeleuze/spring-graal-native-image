@@ -40,6 +40,7 @@ import org.springframework.data.mongodb.repository.support.MongoRepositoryFactor
 import org.springframework.data.mongodb.repository.support.ReactiveMongoRepositoryFactoryBean;
 import org.springframework.data.mongodb.repository.support.SimpleMongoRepository;
 import org.springframework.data.mongodb.repository.support.SimpleReactiveMongoRepository;
+import org.springframework.nativex.AotOptions;
 import org.springframework.nativex.domain.proxies.AotProxyDescriptor;
 import org.springframework.nativex.domain.proxies.JdkProxyDescriptor;
 import org.springframework.nativex.hint.AccessBits;
@@ -49,7 +50,7 @@ import org.springframework.nativex.hint.TypeHint;
 import org.springframework.nativex.type.HintDeclaration;
 import org.springframework.nativex.type.NativeConfiguration;
 import org.springframework.nativex.type.Type;
-import org.springframework.nativex.type.TypeSystem;
+import org.springframework.util.ClassUtils;
 
 
 @NativeHint(trigger = MongoRepositoriesAutoConfiguration.class, types = {
@@ -86,9 +87,9 @@ import org.springframework.nativex.type.TypeSystem;
 public class MongoRepositoriesHints implements NativeConfiguration {
 
 	@Override
-	public List<HintDeclaration> computeHints(TypeSystem typeSystem) {
+	public List<HintDeclaration> computeHints(AotOptions aotOptions) {
 
-		if (!typeSystem.canResolve("org/springframework/data/mongodb/core/mapping/Document")) {
+		if (!ClassUtils.isPresent("org/springframework/data/mongodb/core/mapping/Document", null)) {
 			return Collections.emptyList();
 		}
 

@@ -39,6 +39,7 @@ import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 import org.springframework.hateoas.server.core.LastInvocationAware;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.UriComponentsContributor;
+import org.springframework.nativex.AotOptions;
 import org.springframework.nativex.domain.proxies.AotProxyDescriptor;
 import org.springframework.nativex.domain.proxies.JdkProxyDescriptor;
 import org.springframework.nativex.hint.AccessBits;
@@ -58,6 +59,7 @@ import org.springframework.nativex.type.Type;
 import org.springframework.nativex.type.TypeProcessor;
 import org.springframework.nativex.type.TypeSystem;
 import org.springframework.plugin.PluginHints;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 @NativeHint(trigger = HalConfiguration.class,
@@ -115,27 +117,27 @@ public class HateoasHints implements NativeConfiguration {
 	private static final String ENABLE_HYPERMEDIA_SUPPORT = "Lorg/springframework/hateoas/config/EnableHypermediaSupport;";
 
 	@Override
-	public List<HintDeclaration> computeHints(TypeSystem typeSystem) {
+	public List<HintDeclaration> computeHints(AotOptions aotOptions) {
 
-		if (!typeSystem.canResolve("org/springframework/hateoas/config/EnableHypermediaSupport")) {
+		if (!ClassUtils.isPresent("org.springframework.hateoas.config.EnableHypermediaSupport", null)) {
 			return Collections.emptyList();
 		}
 
-		Set<String> hypermediaFormats = computeConfiguredHypermediaFormats(typeSystem);
+		Set<String> hypermediaFormats = computeConfiguredHypermediaFormats();
 
 		List<HintDeclaration> hints = new ArrayList<>();
-		hints.addAll(computePlugins(typeSystem));
+		hints.addAll(computePlugins());
 
-		hints.addAll(computeAtConfigurationClasses(typeSystem, hypermediaFormats));
-		hints.addAll(computeRepresentationModels(typeSystem));
-		hints.addAll(computeEntityLinks(typeSystem));
-		hints.addAll(computeJacksonMappings(typeSystem, hypermediaFormats));
-		hints.addAll(computeControllerProxies(typeSystem));
+		hints.addAll(computeAtConfigurationClasses(hypermediaFormats));
+		hints.addAll(computeRepresentationModels());
+		hints.addAll(computeEntityLinks());
+		hints.addAll(computeJacksonMappings(hypermediaFormats));
+		hints.addAll(computeControllerProxies());
 
 		return hints;
 	}
 
-	private Set<String> computeConfiguredHypermediaFormats(TypeSystem typeSystem) {
+	private Set<String> computeConfiguredHypermediaFormats() {
 
 		return typeSystem.scanUserCodeDirectoriesAndSpringJars(type -> {
 			try {
@@ -166,7 +168,7 @@ public class HateoasHints implements NativeConfiguration {
 				.collect(Collectors.toSet());
 	}
 
-	private List<HintDeclaration> computeAtConfigurationClasses(TypeSystem typeSystem, Set<String> hypermediaFormats) {
+	private List<HintDeclaration> computeAtConfigurationClasses(Set<String> hypermediaFormats) {
 
 		return TypeProcessor.namedProcessor("HateoasHints - Configuration Classes")
 				.skipTypesMatching(type -> {
@@ -183,7 +185,7 @@ public class HateoasHints implements NativeConfiguration {
 				.toProcessTypesMatching(type -> type.isPartOfDomain("org.springframework.hateoas") && type.isAtConfiguration());
 	}
 
-	private List<HintDeclaration> computeEntityLinks(TypeSystem typeSystem) {
+	private List<HintDeclaration> computeEntityLinks() {
 
 		return TypeProcessor.namedProcessor("HateoasHints - EntityLinks")
 				.filterAnnotations(annotation ->
@@ -201,7 +203,7 @@ public class HateoasHints implements NativeConfiguration {
 	 * @param typeSystem must not be {@literal null}.
 	 * @return
 	 */
-	List<HintDeclaration> computeRepresentationModels(TypeSystem typeSystem) {
+	List<HintDeclaration> computeRepresentationModels() {
 
 		return TypeProcessor.namedProcessor("HateoasHints - RepresentationModel")
 				.skipTypesMatching(type -> type.isPartOfDomain("org.springframework.") || type.isPartOfDomain("com.fasterxml.jackson."))
@@ -229,7 +231,7 @@ public class HateoasHints implements NativeConfiguration {
 	 * @param typeSystem must not be {@literal null}.
 	 * @return never {@literal null}.
 	 */
-	List<HintDeclaration> computeControllerProxies(TypeSystem typeSystem) {
+	List<HintDeclaration> computeControllerProxies() {
 
 		return typeSystem.scanUserCodeDirectoriesAndSpringJars(HateoasHints::isWebControllerProxyCandidate)
 				.flatMap(type -> {
@@ -247,7 +249,7 @@ public class HateoasHints implements NativeConfiguration {
 	}
 
 
-	List<HintDeclaration> computeJacksonMappings(TypeSystem typeSystem, Set<String> hypermediaFormats) {
+	List<HintDeclaration> computeJacksonMappings(Set<String> hypermediaFormats) {
 
 		return TypeProcessor.namedProcessor("HateoasHints - Jackson Mapping Candidates")
 				.skipTypesMatching(type -> {

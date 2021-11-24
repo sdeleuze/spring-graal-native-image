@@ -27,6 +27,8 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.utils.DirtyFlagMap;
 import org.quartz.utils.StringKeyDirtyFlagMap;
+
+import org.springframework.nativex.AotOptions;
 import org.springframework.nativex.hint.AccessBits;
 import org.springframework.nativex.hint.FieldHint;
 import org.springframework.nativex.hint.NativeHint;
@@ -38,6 +40,7 @@ import org.springframework.nativex.type.HintDeclaration;
 import org.springframework.nativex.type.NativeConfiguration;
 import org.springframework.nativex.type.Type;
 import org.springframework.nativex.type.TypeSystem;
+import org.springframework.util.ClassUtils;
 
 /**
  * Supports running scheduled Quartz jobs with Spring
@@ -108,7 +111,10 @@ import org.springframework.nativex.type.TypeSystem;
 public class QuartzHints implements NativeConfiguration {
 
 	@Override
-	public List<HintDeclaration> computeHints(TypeSystem typeSystem) {
+	public List<HintDeclaration> computeHints(AotOptions aotOptions) {
+		if (ClassUtils.isPresent("org.quartz.Job", null)) {
+			return Collections.emptyList();
+		}
 		// Add reflection configuration for the subtypes of org.quartz.Job
 		Type job = typeSystem.resolve("org/quartz/Job", true);
 		if (job != null) {

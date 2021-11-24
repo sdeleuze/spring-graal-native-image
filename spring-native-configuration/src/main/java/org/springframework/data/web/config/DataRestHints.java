@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import org.springframework.boot.autoconfigure.data.rest.RepositoryRestMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcHints;
+import org.springframework.nativex.AotOptions;
 import org.springframework.nativex.type.AccessDescriptor;
 import org.springframework.nativex.type.MissingTypeException;
 import org.springframework.nativex.type.TypeProcessor;
@@ -96,14 +97,14 @@ public class DataRestHints implements NativeConfiguration {
 	private static final String JACKSON_ANNOTATION = "Lcom/fasterxml/jackson/annotation/JacksonAnnotation;";
 
 	@Override
-	public List<HintDeclaration> computeHints(TypeSystem typeSystem) {
+	public List<HintDeclaration> computeHints(AotOptions aotOptions) {
 
 		List<HintDeclaration> hints = new ArrayList<>();
 
-		hints.addAll(computeRestControllerHints(typeSystem));
-		hints.addAll(computeRepositoryRestConfigurer(typeSystem));
-		hints.addAll(computeExcerptProjectionHints(typeSystem));
-		hints.addAll(computeJacksonMappingCandidates(typeSystem));
+		hints.addAll(computeRestControllerHints());
+		hints.addAll(computeRepositoryRestConfigurer());
+		hints.addAll(computeExcerptProjectionHints());
+		hints.addAll(computeJacksonMappingCandidates());
 
 		// TODO: what about RestResource and others
 
@@ -114,10 +115,9 @@ public class DataRestHints implements NativeConfiguration {
 	 * Compute {@link HintDeclaration hints} for all types that extend org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer.
 	 * like "org.springframework.boot.autoconfigure.data.rest.SpringBootRepositoryRestConfigurer"
 	 *
-	 * @param typeSystem must not be {@literal null}.
 	 * @return never {@literal null}.
 	 */
-	private List<HintDeclaration> computeRepositoryRestConfigurer(TypeSystem typeSystem) {
+	private List<HintDeclaration> computeRepositoryRestConfigurer() {
 
 		return TypeProcessor.namedProcessor("RestMvcConfigurationProcessor - RepositoryRestConfigurer")
 				.skipAnnotationInspection()
@@ -137,10 +137,9 @@ public class DataRestHints implements NativeConfiguration {
 	 * Compute {@link HintDeclaration hints} for all types (meta)annotated with @BasePathAwareController.
 	 * Not interested in any fields reachable from these types but inspecting the methods for web-bind annotations.
 	 *
-	 * @param typeSystem must not be {@literal null}.
 	 * @return never {@literal null}.
 	 */
-	private List<HintDeclaration> computeRestControllerHints(TypeSystem typeSystem) {
+	private List<HintDeclaration> computeRestControllerHints() {
 
 		return TypeProcessor.namedProcessor("RestMvcConfigurationProcessor - RestController")
 				.skipTypesMatching(type -> !type.hasAnnotationInHierarchy(BASE_PATH_AWARE_CONTROLLER))
@@ -161,10 +160,9 @@ public class DataRestHints implements NativeConfiguration {
 	 * Compute {@link HintDeclaration hints} for all types (meta)annotated with @RepositoryRestResource.
 	 * Extract the excerptProjection and register types as well as proxy configuration.
 	 *
-	 * @param typeSystem must not be {@literal null}.
 	 * @return never {@literal null}.
 	 */
-	private List<HintDeclaration> computeExcerptProjectionHints(TypeSystem typeSystem) {
+	private List<HintDeclaration> computeExcerptProjectionHints() {
 
 		TypeHintCreatingProcessor excerptProjectionProcessor = TypeProcessor.namedProcessor("RestMvcConfigurationProcessor - ExcerptProjection")
 				.skipFieldInspection().use(typeSystem);
@@ -203,7 +201,7 @@ public class DataRestHints implements NativeConfiguration {
 				.collect(Collectors.toList());
 	}
 
-	List<HintDeclaration> computeJacksonMappingCandidates(TypeSystem typeSystem) {
+	List<HintDeclaration> computeJacksonMappingCandidates() {
 
 		return TypeProcessor.namedProcessor("RestMvcConfigurationProcessor - Jackson Mapping Candidates")
 				.skipTypesMatching(type -> {

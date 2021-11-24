@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.springframework.integration.jdbc.store.JdbcMessageStore;
+import org.springframework.nativex.AotOptions;
 import org.springframework.nativex.hint.AccessBits;
 import org.springframework.nativex.hint.InitializationHint;
 import org.springframework.nativex.hint.InitializationTime;
@@ -181,17 +182,17 @@ public class IntegrationHints implements NativeConfiguration {
 	private static final String MESSAGE_TYPE = "org/springframework/messaging/Message";
 
 	@Override
-	public List<HintDeclaration> computeHints(TypeSystem typeSystem) {
+	public List<HintDeclaration> computeHints(AotOptions aotOptions) {
 		List<HintDeclaration> hints = new ArrayList<>();
-		hints.addAll(computeMessagingGatewayHints(typeSystem));
-		hints.addAll(computeAbstractEndpointHints(typeSystem));
-		hints.addAll(computeIntegrationNodeHints(typeSystem));
+		hints.addAll(computeMessagingGatewayHints());
+		hints.addAll(computeAbstractEndpointHints());
+		hints.addAll(computeIntegrationNodeHints());
 		//		TODO Fails with 'Unable to find class file for org/springframework/web/server/WebFilter' on 'spring-aot-maven-plugin:test-generate'
 		//		hints.addAll(computeMessageHints(typeSystem));
 		return hints;
 	}
 
-	private static List<HintDeclaration> computeMessagingGatewayHints(TypeSystem typeSystem) {
+	private static List<HintDeclaration> computeMessagingGatewayHints() {
 		return TypeProcessor.namedProcessor("IntegrationHints - MessagingGateway")
 				.skipMethodInspection()
 				.skipFieldInspection()
@@ -209,7 +210,7 @@ public class IntegrationHints implements NativeConfiguration {
 				.processTypes();
 	}
 
-	private static List<HintDeclaration> computeAbstractEndpointHints(TypeSystem typeSystem) {
+	private static List<HintDeclaration> computeAbstractEndpointHints() {
 		return TypeProcessor.namedProcessor("IntegrationHints - AbstractEndpoint")
 				.skipAnnotationInspection()
 				.skipMethodInspection()
@@ -223,7 +224,7 @@ public class IntegrationHints implements NativeConfiguration {
 				.processTypes();
 	}
 
-	private static List<HintDeclaration> computeIntegrationNodeHints(TypeSystem typeSystem) {
+	private static List<HintDeclaration> computeIntegrationNodeHints() {
 		return TypeProcessor.namedProcessor("IntegrationHints - IntegrationNode")
 				.skipAnnotationInspection()
 				.skipMethodInspection()
@@ -237,7 +238,7 @@ public class IntegrationHints implements NativeConfiguration {
 				.processTypes();
 	}
 
-	private static List<HintDeclaration> computeMessageHints(TypeSystem typeSystem) {
+	private static List<HintDeclaration> computeMessageHints() {
 		return TypeProcessor.namedProcessor("IntegrationHints - Message")
 				.skipAnnotationInspection()
 				.skipMethodInspection()
