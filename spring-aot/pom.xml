@@ -129,6 +129,8 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
+			<!-- Remove the version override to reproduce the issue -->
+			<version>4.3.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
