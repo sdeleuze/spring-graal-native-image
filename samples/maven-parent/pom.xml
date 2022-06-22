@@ -17,8 +17,6 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<!-- Customize Spring Boot classifier, useful in order to avoid a clash between Spring Boot repackaging and native-image-maven-plugin -->
-		<repackage.classifier/>
 
 		<!-- `tiny` builder allows small footprint and reduced surface attack, you can also use `base` (the default) or `full` builders to have more tooling available in the image for an improved developer experience -->
 		<builder>paketobuildpacks/builder:tiny</builder>
@@ -27,7 +25,7 @@
 
 		<wavefront.version>2.2.0</wavefront.version>
 		<spring-cloud.version>2021.0.3</spring-cloud.version>
-		<native.buildtools.version>0.9.11</native.buildtools.version>
+		<native.buildtools.version>0.9.12</native.buildtools.version>
 		<!-- -O1 is the default, but we specify it anyway as this property can't be empty. It's used by the -q commandline parameter to override the value with -Ob to enable quick build mode -->
 		<native.buildtools.buildArg>-O1</native.buildtools.buildArg>
 	</properties>
@@ -39,7 +37,6 @@
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<configuration>
-						<classifier>${repackage.classifier}</classifier>
 						<image>
 							<builder>${builder}</builder>
 							<env>
@@ -179,10 +176,6 @@
 		<!-- Enable building a native image using a local installation of native-image with GraalVM native-maven-plugin -->
 		<profile>
 			<id>native</id>
-			<properties>
-				<!-- Avoid a clash between Spring Boot repackaging and native-maven-plugin -->
-				<repackage.classifier>exec</repackage.classifier>
-			</properties>
 			<dependencies>
 				<!-- Required with Maven Surefire 2.x -->
 				<dependency>
