@@ -1,5 +1,8 @@
 package org.springframework.aot.thirdpartyhints;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -18,9 +21,13 @@ public class NettyRuntimeHints implements RuntimeHintsRegistrar {
             return;
         }
         hints.reflection().registerType(TypeReference.of("io.netty.buffer.AbstractByteBufAllocator"),
-                hint -> hint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
+                hint -> hint.withMethod("toLeakAwareBuffer", Collections.singletonList(TypeReference.of("io.netty.buffer.ByteBuf")), builder -> {}));
         hints.reflection().registerType(TypeReference.of("io.netty.util.ReferenceCountUtil"),
-                hint -> hint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
+                hint -> {
+                    hint.withMethod("touch", Collections.singletonList(TypeReference.of(Object.class)), builder -> {});
+                    hint.withMethod("touch", Arrays.asList(TypeReference.of(Object.class), TypeReference.of(Object.class)), builder -> {});
+                });
+
         hints.reflection().registerType(
                 TypeReference.of("io.netty.util.internal.shaded.org.jctools.maps.NonBlockingHashMap"),
                 hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
@@ -113,8 +120,6 @@ public class NettyRuntimeHints implements RuntimeHintsRegistrar {
         hints.reflection().registerType(
                 TypeReference.of("io.netty.util.internal.shaded.org.jctools.queues.SpscArrayQueueProducerIndexFields"),
                 hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
-        hints.reflection().registerType(TypeReference.of("io.netty.channel.socket.nio.NioSocketChannel"), hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
-        hints.reflection().registerType(TypeReference.of("io.netty.channel.socket.nio.NioDatagramChannel"), hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
     }
 
 }
